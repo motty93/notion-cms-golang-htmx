@@ -11,12 +11,41 @@ type HeadingBlock struct {
 	RichText []gn.RichText
 }
 
+func ProcessBlock(block gn.Block) string {
+	switch b := block.(type) {
+	case *gn.ParagraphBlock:
+		return ProcessParagraphBlock(b)
+	case *gn.Heading1Block:
+		return ProcessHeadingBlock(HeadingBlock{Tag: "h1", RichText: b.RichText})
+	case *gn.Heading2Block:
+		return ProcessHeadingBlock(HeadingBlock{Tag: "h2", RichText: b.RichText})
+	case *gn.Heading3Block:
+		return ProcessHeadingBlock(HeadingBlock{Tag: "h3", RichText: b.RichText})
+	case *gn.BulletedListItemBlock:
+		return ProcessBulletedListItemBlock(b)
+	case *gn.NumberedListItemBlock:
+		return ProcessNumberedListItemBlock(b)
+	case *gn.ImageBlock:
+		return ProcessImageBlock(b)
+	case *gn.TableOfContentsBlock:
+		return ProcessTableOfContentsBlock()
+	case *gn.QuoteBlock:
+		return ProcessQuoteBlock(b)
+	case *gn.DividerBlock:
+		return ProcessDividerBlock()
+	default:
+		fmt.Printf("Unsupported block type: %T\n", b)
+		return ""
+	}
+}
+
+// this block is p tag
 func ProcessParagraphBlock(b *gn.ParagraphBlock) string {
-	html := "<p>"
+	html := ""
 	for _, text := range b.RichText {
 		html += fmt.Sprintf("<p>%s</p>", text.Text.Content)
 	}
-	html += "</p>"
+	html += ""
 
 	return html
 }
@@ -76,32 +105,4 @@ func ProcessQuoteBlock(b *gn.QuoteBlock) string {
 
 func ProcessDividerBlock() string {
 	return "<hr/>"
-}
-
-func ProcessBlock(block gn.Block) string {
-	switch b := block.(type) {
-	case *gn.ParagraphBlock:
-		return ProcessParagraphBlock(b)
-	case *gn.Heading1Block:
-		return ProcessHeadingBlock(HeadingBlock{Tag: "h1", RichText: b.RichText})
-	case *gn.Heading2Block:
-		return ProcessHeadingBlock(HeadingBlock{Tag: "h2", RichText: b.RichText})
-	case *gn.Heading3Block:
-		return ProcessHeadingBlock(HeadingBlock{Tag: "h3", RichText: b.RichText})
-	case *gn.BulletedListItemBlock:
-		return ProcessBulletedListItemBlock(b)
-	case *gn.NumberedListItemBlock:
-		return ProcessNumberedListItemBlock(b)
-	case *gn.ImageBlock:
-		return ProcessImageBlock(b)
-	case *gn.TableOfContentsBlock:
-		return ProcessTableOfContentsBlock()
-	case *gn.QuoteBlock:
-		return ProcessQuoteBlock(b)
-	case *gn.DividerBlock:
-		return ProcessDividerBlock()
-	default:
-		fmt.Printf("Unsupported block type: %T\n", b)
-		return ""
-	}
 }
