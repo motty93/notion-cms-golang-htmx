@@ -9,6 +9,8 @@ htmxを使ってSPAで実装
 ## notion DB
 ![image](https://github.com/user-attachments/assets/ab5ae41d-0286-4425-97c9-1d0acdf2a881)
 
+画像通りのpropertyを持つDBを作成すること
+
 
 ## development
 ### get started
