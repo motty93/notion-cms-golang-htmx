@@ -4,21 +4,38 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
+	"time"
 
 	gn "github.com/dstotijn/go-notion"
 	"github.com/gorilla/mux"
 )
+
+type CustomPage struct {
+	ID             string       `json:"id"`
+	CreatedTime    time.Time    `json:"created_time"`
+	CreatedBy      *gn.BaseUser `json:"created_by,omitempty"`
+	LastEditedTime time.Time    `json:"last_edited_time"`
+	LastEditedBy   *gn.BaseUser `json:"last_edited_by,omitempty"`
+	Parent         gn.Parent    `json:"parent"`
+	Archived       bool         `json:"archived"`
+	URL            string       `json:"url"`
+	Icon           *gn.Icon     `json:"icon,omitempty"`
+	Cover          *gn.Cover    `json:"cover,omitempty"`
+
+	Properties map[string]gn.DatabasePageProperty `json:"properties"`
+}
 
 func FetchCategoriesHandler(w http.ResponseWriter, r *http.Request) {
 	apiKey := os.Getenv("NOTION_API_KEY")
 	databaseID := os.Getenv("NOTION_DATABASE_ID")
 
 	client := gn.NewClient(apiKey)
-
 	database, err := client.FindDatabaseByID(context.Background(), databaseID)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, "Failed to fetch Notion data", http.StatusInternalServerError)
 		return
 	}
@@ -44,7 +61,6 @@ func FetchArticlesHandler(w http.ResponseWriter, r *http.Request) {
 	databaseID := os.Getenv("NOTION_DATABASE_ID")
 
 	client := gn.NewClient(apiKey)
-
 	query := gn.DatabaseQuery{
 		Filter: &gn.DatabaseQueryFilter{
 			Property: "Published",
@@ -54,38 +70,46 @@ func FetchArticlesHandler(w http.ResponseWriter, r *http.Request) {
 				},
 			},
 		},
+		Sorts: []gn.DatabaseQuerySort{
+			{
+				Property:  "CreatedAt",
+				Direction: gn.SortDirDesc,
+			},
+		},
 		PageSize: 20,
 	}
 
 	res, err := client.QueryDatabase(context.Background(), databaseID, &query)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, "Failed to fetch Notion data", http.StatusInternalServerError)
 		return
 	}
 
-	var html string
-	html += "<ul>"
+	var pages []CustomPage
 	for _, page := range res.Results {
-		properties, ok := page.Properties.(map[string]gn.DatabasePageProperty)
-		if !ok {
-			http.Error(w, "Failed to parse Notion data", http.StatusInternalServerError)
-			return
-		}
-
-		title := properties["Title"].Title[0].Text.Content
-		category := properties["Category"].Select.Name
-		slug := properties["Slug"].RichText[0].Text.Content
-
-		if len(title) == 0 || len(category) == 0 || len(slug) == 0 {
+		var customPage CustomPage
+		jsonData, err := json.Marshal(page)
+		if err != nil {
+			log.Println(err)
 			continue
 		}
+		json.Unmarshal(jsonData, &customPage)
+		pages = append(pages, customPage)
+	}
 
+	var html string
+	html += "<ul>"
+	for _, page := range pages {
+		title := page.Properties["Title"].Title[0].Text.Content
+		slug := page.Properties["Slug"].RichText[0].Text.Content
+		category := page.Properties["Category"].Select.Name
 		html += fmt.Sprintf(
 			`<li><a href="#" hx-get="/cms/%s/%s" hx-target="#content" hx-push-url="/cms/%s/%s">%s</a></li>`,
 			category, slug, category, slug, title,
 		)
-		html += "</ul>"
 	}
+	html += "</ul>"
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(html))
@@ -125,6 +149,7 @@ func FetchArticleHandler(w http.ResponseWriter, r *http.Request) {
 
 	res, err := client.QueryDatabase(context.Background(), databaseID, &query)
 	if err != nil || len(res.Results) == 0 {
+		log.Printf("Failed to fetch Notion data: %v", err)
 		http.Error(w, "Article not found", http.StatusNotFound)
 		return
 	}
@@ -135,6 +160,7 @@ func FetchArticleHandler(w http.ResponseWriter, r *http.Request) {
 	// ページブロック（本文）を取得
 	children, err := client.FindBlockChildrenByID(context.Background(), pageID, nil)
 	if err != nil {
+		log.Printf("Failed to fetch Notion data: %v", err)
 		http.Error(w, "Failed to fetch blog content", http.StatusInternalServerError)
 		return
 	}
@@ -142,16 +168,20 @@ func FetchArticleHandler(w http.ResponseWriter, r *http.Request) {
 	// ブロック内容をHTMLに変換
 	contentHTML := ""
 	for _, block := range children.Results {
-		contentHTML += ProcessBlock(block) // util.go
+		content := ProcessBlock(block) // utils.go
+		contentHTML += content
 	}
 
-	properties, ok := page.Properties.(map[string]gn.DatabasePageProperty)
-	if !ok {
-		http.Error(w, "Failed to parse Notion data", http.StatusInternalServerError)
+	// NOTE: page.Properties["Title"]だとinterface{}型で返ってくるため、CustomPage型に変換する
+	var customPage CustomPage
+	jsonData, err := json.Marshal(page)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Failed to fetch Notion data", http.StatusInternalServerError)
 		return
 	}
-
-	title := properties["Title"].Title[0].Text.Content
+	json.Unmarshal(jsonData, &customPage)
+	title := customPage.Properties["Title"].Title[0].Text.Content
 
 	// HTML を生成
 	html := fmt.Sprintf(`
