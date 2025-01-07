@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Notion CMS</title>
+	<link rel="stylesheet" href="css/style.css">
+	script src="https://unpkg.com/htmx.org"></script>
+	<script src="js/app.js" defer></script>
+</head>
+
+<body>
+	<header>
+		<h1>Welcome to Notion CMS</h1>
+		<nav>
+			<a href="#" hx-get="/cms" hx-target="#content" hx-push-url="/cms">Home</a>
+		</nav>
+	</header>
+	<aside id="sidebar" hx-get="/cms/categories" hx-trigger="load" hx-target="#sidebar">
+		<ul>
+      <li>Loading categories...</li>
+			<!-- <li><a href="#" hx-get="/cms/blog" hx-target="#content" hx-push-url="/cms/blog">Blog</a></li> -->
+			<!-- <li><a href="#" hx-get="/cms/docs" hx-target="#content" hx-push-url="/cms/docs">Docs</a></li> -->
+		</ul>
+	</aside>
+	<main id="content" hx-get="/cms" hx-trigger="load" hx-target="#content">
+		<p>Loading content...</p>
+	</main>
+</body>
+
+</html>
