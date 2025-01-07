@@ -39,7 +39,7 @@ func FetchCategoriesHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(categories)
 }
 
-func FetchCMSDataHandler(w http.ResponseWriter, r *http.Request) {
+func FetchArticlesHandler(w http.ResponseWriter, r *http.Request) {
 	apiKey := os.Getenv("NOTION_API_KEY")
 	databaseID := os.Getenv("NOTION_DATABASE_ID")
 
@@ -75,7 +75,10 @@ func FetchCMSDataHandler(w http.ResponseWriter, r *http.Request) {
 		title := properties["Title"].Title[0].Text.Content
 		category := properties["Category"].Select.Name
 		slug := properties["Slug"].RichText[0].Text.Content
-		// content := properties["Content"].RichText[0].Text.Content
+
+		if len(title) == 0 || len(category) == 0 || len(slug) == 0 {
+			continue
+		}
 
 		html += fmt.Sprintf(
 			`<li><a href="#" hx-get="/cms/%s/%s" hx-target="#content" hx-push-url="/cms/%s/%s">%s</a></li>`,
@@ -127,6 +130,21 @@ func FetchArticleHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	page := res.Results[0]
+	pageID := page.ID
+
+	// ページブロック（本文）を取得
+	children, err := client.FindBlockChildrenByID(context.Background(), pageID, nil)
+	if err != nil {
+		http.Error(w, "Failed to fetch blog content", http.StatusInternalServerError)
+		return
+	}
+
+	// ブロック内容をHTMLに変換
+	contentHTML := ""
+	for _, block := range children.Results {
+		contentHTML += ProcessBlock(block) // util.go
+	}
+
 	properties, ok := page.Properties.(map[string]gn.DatabasePageProperty)
 	if !ok {
 		http.Error(w, "Failed to parse Notion data", http.StatusInternalServerError)
@@ -134,7 +152,6 @@ func FetchArticleHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	title := properties["Title"].Title[0].Text.Content
-	content := properties["Content"].RichText[0].Text.Content
 
 	// HTML を生成
 	html := fmt.Sprintf(`
@@ -144,7 +161,7 @@ func FetchArticleHandler(w http.ResponseWriter, r *http.Request) {
 			<div>%s</div>
 			<a href="#" hx-get="/cms" hx-target="#content" hx-push-url="/cms">Back to Articles</a>
 		</article>
-	`, title, category, content)
+	`, title, category, contentHTML)
 
 	w.Header().Set("Content-Type", "text/html")
 	w.Write([]byte(html))

@@ -21,7 +21,7 @@ func main() {
 	r.PathPrefix("/").Handler(staticFileHandler("./static"))
 
 	// API handlers
-	r.HandleFunc("/cms", notion.FetchCMSDataHandler).Methods("GET")
+	r.HandleFunc("/cms", notion.FetchArticlesHandler).Methods("GET")
 	r.HandleFunc("/cms/categories", notion.FetchCategoriesHandler).Methods("GET")
 	r.HandleFunc("/cms/{category}/{slug}", notion.FetchArticleHandler).Methods("GET")
 
