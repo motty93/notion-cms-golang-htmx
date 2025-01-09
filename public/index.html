@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Documentation</title>
+	<link rel="stylesheet" href="css/style.css">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.294.0/lucide.min.css" rel="stylesheet">
+</head>
+
+<body>
+	<!-- Top Navigation -->
+	<nav class="top-nav">
+		<div class="nav-container">
+			<div class="nav-left">
+				<img src="/lovable-uploads/11751b9b-6116-4c68-a542-582aeaf02f51.png" alt="Logo" class="logo">
+				<span class="site-title">Documentation</span>
+			</div>
+			<div class="nav-right">
+				<a href="https://github.com" target="_blank" rel="noopener noreferrer" class="github-link">
+					<i data-lucide="github"></i>
+				</a>
+			</div>
+		</div>
+	</nav>
+
+	<!-- Sidebar -->
+	<div class="sidebar">
+		<nav class="sidebar-nav">
+			<div class="nav-section">
+				<button class="section-button">
+					グロースハックチームについて
+					<i data-lucide="chevron-down" class="chevron"></i>
+				</button>
+				<div class="section-content">
+					<a href="/analytics" class="nav-link">分析基盤について</a>
+					<a href="/utilities" class="nav-link">ユーティリティ</a>
+				</div>
+			</div>
+
+			<div class="nav-section">
+				<a href="/vision" class="nav-link">ビジョン</a>
+			</div>
+
+			<div class="nav-section">
+				<button class="section-button">
+					仕事内容
+					<i data-lucide="chevron-down" class="chevron"></i>
+				</button>
+				<div class="section-content">
+					<a href="/data-engineer" class="nav-link">データエンジニア</a>
+					<a href="/analytics-engineer" class="nav-link">アナリティクスエンジニア</a>
+				</div>
+			</div>
+		</nav>
+	</div>
+
+	<main class="main-content">
+		<div class="content-container">
+			<nav class="breadcrumbs">
+				<ol>
+					<li><a href="/">ホーム</a></li>
+					<li><a href="/teams">チーム</a></li>
+					<li>グロースハックチーム</li>
+				</ol>
+			</nav>
+
+			<div class="content-wrapper">
+				<div class="content">
+					<h1>グロースハックチームについて</h1>
+
+					<section id="vision" class="content-section">
+						<h2>ビジョン</h2>
+						<p>「デジタル技術の専門家として、and roots の 1 人ひとりが事業の本質と向き合える時間を創る」</p>
+					</section>
+
+					<section id="work" class="content-section">
+						<h2>仕事内容</h2>
+						<p>グロースハックチームは、ビジネスの持続的な成長を支援するために以下の 2 つの専門職に分かれて活動しています。</p>
+						<ol>
+							<li>データエンジニア</li>
+							<li>アナリティクスエンジニア</li>
+						</ol>
+					</section>
+
+					<section id="data-engineer" class="content-section">
+						<h2>1. データエンジニア</h2>
+						<img src="/lovable-uploads/11751b9b-6116-4c68-a542-582aeaf02f51.png" alt="Data Engineer Role" class="role-image">
+						<p>データエンジニアは、データの収集や処理といったフローを設計・自動化し、ビジネスに関するあらゆるデータを DWH アプリケーションに接続し、エンドユーザーやアナリティクスエンジニアにデータを継続的に提供します。</p>
+					</section>
+
+					<section id="vision2" class="content-section">
+						<h2>ビジョン2</h2>
+						<p>「デジタル技術の専門家として、and roots の 1 人ひとりが事業の本質と向き合える時間を創る」</p>
+					</section>
+
+					<section id="work2" class="content-section">
+						<h2>仕事内容2</h2>
+						<p>グロースハックチームは、ビジネスの持続的な成長を支援するために以下の 2 つの専門職に分かれて活動しています。</p>
+						<ol>
+							<li>データエンジニア</li>
+							<li>アナリティクスエンジニア</li>
+						</ol>
+					</section>
+
+					<section id="data-engineer2" class="content-section">
+						<h2>1. データエンジニア22</h2>
+						<img src="/lovable-uploads/11751b9b-6116-4c68-a542-582aeaf02f51.png" alt="Data Engineer Role" class="role-image">
+						<p>データエンジニアは、データの収集や処理といったフローを設計・自動化し、ビジネスに関するあらゆるデータを DWH アプリケーションに接続し、エンドユーザーやアナリティクスエンジニアにデータを継続的に提供します。</p>
+					</section>
+
+				</div>
+
+				<!-- Table of Contents -->
+				<aside class="table-of-contents">
+					<nav>
+						<a href="#vision">ビジョン</a>
+						<a href="#work">仕事内容</a>
+						<a href="#data-engineer">1. データエンジニア</a>
+						<a href="#vision2">ビジョン2</a>
+						<a href="#work2">仕事内容2</a>
+						<a href="#data-engineer2">1. データエンジニア22</a>
+					</nav>
+				</aside>
+			</div>
+		</div>
+	</main>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.294.0/lucide.min.js"></script>
+	<script>
+		lucide.createIcons();
+
+		// Toggle sidebar sections
+		document.querySelectorAll('.section-button').forEach(button => {
+			button.addEventListener('click', () => {
+				const content = button.nextElementSibling;
+				const chevron = button.querySelector('.chevron');
+				content.classList.toggle('active');
+				chevron.classList.toggle('rotated');
+			});
+		});
+	</script>
+</body>
+
+</html>
